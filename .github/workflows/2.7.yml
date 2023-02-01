@@ -31,6 +31,7 @@ jobs:
     - uses: ruby/setup-ruby@v1
       with:
         ruby-version: 2.7
+        rubygems: latest
     - name: Bundle
       run: |
         sudo apt-get install libsqlite3-dev
