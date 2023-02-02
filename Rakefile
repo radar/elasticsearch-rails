@@ -16,10 +16,12 @@
 # under the License.
 
 require 'pathname'
-require 'elasticsearch'
+require 'opensearch'
 
-subprojects = ['elasticsearch-rails', 'elasticsearch-persistence']
-subprojects << 'elasticsearch-model' unless defined?(JRUBY_VERSION)
+# Temporarily disable these.
+# subprojects = ['opensearch-rails', 'opensearch-persistence']
+subprojects = ['opensearch-model']
+# subprojects << 'opensearch-model' unless defined?(JRUBY_VERSION)
 
 __current__ = Pathname(File.expand_path(__dir__))
 
@@ -82,7 +84,7 @@ namespace :bundle do
     subprojects.each do |project|
       sh "rm -f #{__current__.join(project)}/Gemfile.lock"
     end
-    sh "rm -f #{__current__.join('elasticsearch-model/gemfiles')}/*.lock"
+    sh "rm -f #{__current__.join('opensearch-model/gemfiles')}/*.lock"
   end
   sh "rm -f Gemfile.lock"
 end
@@ -115,26 +117,26 @@ namespace :test do
   end
 
   desc "Run integration tests in all subprojects"
-  task integration: :setup_elasticsearch do
-    # 1/ elasticsearch-model
+  task integration: :setup_opensearch do
+    # 1/ opensearch-model
     #
     puts '-'*80
-    sh "cd #{__current__.join('elasticsearch-model')} && unset BUNDLE_GEMFILE &&" +
+    sh "cd #{__current__.join('opensearch-model')} && unset BUNDLE_GEMFILE &&" +
        %Q| #{ ENV['TEST_BUNDLE_GEMFILE'] ? "BUNDLE_GEMFILE='#{ENV['TEST_BUNDLE_GEMFILE']}'" : '' }|  +
        " bundle exec rake test:integration"
     puts "\n"
 
-    # 2/ elasticsearch-persistence
+    # 2/ opensearch-persistence
     #
     puts '-'*80
-    sh "cd #{__current__.join('elasticsearch-persistence')} && unset BUNDLE_GEMFILE &&" +
+    sh "cd #{__current__.join('opensearch-persistence')} && unset BUNDLE_GEMFILE &&" +
        " bundle exec rake test:integration"
     puts "\n"
 
-    # 3/ elasticsearch-rails
+    # 3/ opensearch-rails
     #
     puts '-'*80
-    sh "cd #{__current__.join('elasticsearch-rails')} && unset BUNDLE_GEMFILE &&" +
+    sh "cd #{__current__.join('opensearch-rails')} && unset BUNDLE_GEMFILE &&" +
        " bundle exec rake test:integration"
     puts "\n"
   end
@@ -151,9 +153,9 @@ namespace :test do
   end
 end
 
-desc "Wait for elasticsearch cluster to be in green state"
+desc "Wait for opensearch cluster to be in green state"
 task :wait_for_green do
-  require 'elasticsearch'
+  require 'opensearch'
 
   ready = nil
   5.times do |i|
@@ -232,7 +234,7 @@ task :update_version, :old, :new do |_, args|
 
   puts "\n\n", "= CHANGELOG ".ansi(:faint) + ('='*88).ansi(:faint), "\n"
 
-  log = `git --no-pager log --reverse --no-color --pretty='* %s' HEAD --not v#{args[:old]} elasticsearch-*`.split("\n")
+  log = `git --no-pager log --reverse --no-color --pretty='* %s' HEAD --not v#{args[:old]} opensearch-*`.split("\n")
 
   puts log.join("\n")
 
@@ -288,7 +290,7 @@ task :update_version, :old, :new do |_, args|
 
   puts "\n\n", "= DIFF ".ansi(:faint) + ('='*93).ansi(:faint)
 
-  diff = `git --no-pager diff --patch --word-diff=color --minimal elasticsearch-*`.split("\n")
+  diff = `git --no-pager diff --patch --word-diff=color --minimal opensearch-*`.split("\n")
 
   puts diff
           .reject { |l| l =~ /^\e\[1mdiff \-\-git/ }
@@ -300,7 +302,7 @@ task :update_version, :old, :new do |_, args|
 
   puts "\n\n", "= COMMIT ".ansi(:faint) + ('='*91).ansi(:faint), "\n"
 
-  puts  'git add CHANGELOG.md elasticsearch-*',
+  puts  'git add CHANGELOG.md opensearch-*',
         "git commit --verbose --message='Release #{args[:new]}' --edit",
         'rake release'
         "\n"
